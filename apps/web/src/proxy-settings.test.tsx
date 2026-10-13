@@ -77,6 +77,7 @@ beforeEach(() => {
   restart.mockResolvedValue(undefined);
   window.readerDesktop = {
     platform: "win32",
+    arch: "x64",
     proxySettings: get,
     saveProxySettings: save,
     checkProxy: check,

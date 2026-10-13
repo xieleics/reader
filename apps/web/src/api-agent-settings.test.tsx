@@ -141,6 +141,7 @@ it("groups proxy settings and log export under diagnostics without a network tab
   const exportLogs = vi.fn(async () => true);
   window.readerDesktop = {
     platform: "darwin",
+    arch: "arm64",
     proxySettings: vi.fn(async (): Promise<ProxySettingsState> => ({
       settings: { mode: "manual", host: "127.0.0.1", port: 7890 },
       restartRequired: false,
