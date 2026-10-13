@@ -275,7 +275,9 @@ export interface ReaderAnnotationTarget {
 }
 export type Appearance = "light" | "sepia" | "dark" | "system";
 export interface ReaderTheme {
+  /** Opt in to copying ordinary text selections. */
   autoCopySelection?: boolean;
+  /** Opt in to copying the source quote when selecting an annotation. */
   autoCopyAnnotation?: boolean;
   autoTranslatePDF?: boolean;
   appearance?: Appearance;
@@ -353,6 +355,8 @@ export interface ReaderEvents {
   epubReadingAnchor?: (blockId: string) => void;
   blockHover?: (block: PDFBlock | null) => void;
   annotation?: (target: ReaderAnnotationTarget | null) => void;
+  /** Hover preview only; never select or copy annotation text. */
+  annotationHover?: (target: ReaderAnnotationTarget | null) => void;
   zoom?: (zoom: ReaderTheme["zoom"]) => void;
   readingAnchor?: (anchor: PDFReadingAnchor) => void;
   blockFocus?: (block: PDFBlock) => void;

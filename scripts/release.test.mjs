@@ -39,7 +39,13 @@ function run(script, cwd, env = {}, args = []) {
 }
 async function installers(cwd) {
   const files = [];
-  for (const target of ["mac-arm64.dmg", "mac-arm64.zip", "win-x64.exe"]) {
+  for (const target of [
+    "mac-arm64.dmg",
+    "mac-arm64.zip",
+    "win-x64.exe",
+    "mac-intel-x64.dmg",
+    "mac-intel-x64.zip",
+  ]) {
     const file = `Reader-0.2.0-${target}`;
     const bytes = Buffer.alloc(1024 * 1024 + 512);
     if (target.endsWith("dmg")) bytes.write("koly", bytes.length - 512);
@@ -63,11 +69,33 @@ test("release refuses a version mismatch before building", async () => {
   expect(manifests.status).not.toBe(0);
   expect(manifests.stderr).toContain("Root and desktop versions must match");
 });
+test.each([{}, { "0.2.0": [] }, { "0.2.0": [{ title: " " }] }])(
+  "release refuses missing or empty current-version notes: %j",
+  async (notes) => {
+    const cwd = await fixture();
+    await mkdir(join(cwd, "docs"));
+    await writeFile(
+      join(cwd, "docs/release-notes.json"),
+      JSON.stringify(notes),
+    );
+    const result = run("release-source.mjs", cwd);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(
+      /Update docs\/release-notes.json|Release notes require/,
+    );
+  },
+);
 test("release refuses missing or unexpected artifacts", async () => {
   const cwd = await fixture();
   expect(run("release-assets.mjs", cwd).status).not.toBe(0);
   await installers(cwd);
   await rm(join(cwd, "release/Reader-0.2.0-win-x64.exe"));
+  expect(run("release-assets.mjs", cwd).status).not.toBe(0);
+  await installers(cwd);
+  await rm(join(cwd, "release/Reader-0.2.0-mac-intel-x64.zip"));
+  expect(run("release-assets.mjs", cwd, { MAC_ONLY: "true" }).status).not.toBe(
+    0,
+  );
   expect(run("release-assets.mjs", cwd).status).not.toBe(0);
   await installers(cwd);
   await writeFile(join(cwd, "release/Reader-0.2.0-mac-x64.dmg"), "unexpected");
@@ -84,14 +112,14 @@ test("release checks installer format before writing hashes", async () => {
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain("Invalid installer format");
 });
-test("Mac-only release accepts only the DMG and update ZIP", async () => {
+test("Mac-only release requires DMG and update ZIP for both architectures", async () => {
   const cwd = await fixture();
   const files = await installers(cwd);
   await rm(join(cwd, "release/Reader-0.2.0-win-x64.exe"));
   expect(run("release-assets.mjs", cwd).status).not.toBe(0);
   expect(run("release-assets.mjs", cwd, { MAC_ONLY: "true" }).status).toBe(0);
   const hashes = await readFile(join(cwd, "release/SHA256SUMS.txt"), "utf8");
-  expect(hashes.split("\n").filter(Boolean)).toHaveLength(2);
+  expect(hashes.split("\n").filter(Boolean)).toHaveLength(4);
   for (const { file, bytes } of files.filter(
     ({ file }) => !file.endsWith(".exe"),
   ))
