@@ -269,6 +269,9 @@ export function Workspace({
   const annotationSaving = useRef(false);
   const [noteSaving, setNoteSaving] = useState(false);
   const lastCopiedSelection = useRef<string | null>(null);
+  useEffect(() => {
+    lastCopiedSelection.current = null;
+  }, [theme.autoCopySelection]);
   const [annotationTarget, setAnnotationTarget] =
     useState<ReaderAnnotationTarget | null>(null);
   const { deleting, remove: removeAnnotation } = useAnnotationDeletion(
@@ -537,12 +540,17 @@ export function Workspace({
     const annotation = target
       ? activeAnnotation(annotations, target.ids)
       : undefined;
-    if (annotation?.quote) void copyText(annotation.quote, "已复制");
+    if (theme.autoCopyAnnotation === true && annotation?.quote)
+      void copyText(annotation.quote, "已复制");
   };
   const selectText = (next: ReaderSelection | null) => {
     setSelection(next);
     const key = next ? JSON.stringify([next.text, next.location]) : null;
-    if (next?.text && key !== lastCopiedSelection.current)
+    if (
+      theme.autoCopySelection === true &&
+      next?.text &&
+      key !== lastCopiedSelection.current
+    )
       void copyText(next.text, "已复制");
     lastCopiedSelection.current = key;
   };

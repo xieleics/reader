@@ -656,6 +656,27 @@ export function Settings({
             </section>
           </TabsContent>
           <TabsContent value="reading" className="settings-panel" keepMounted>
+            <section className="mb-6 space-y-3">
+              <h3 className="text-sm font-medium">自动复制</h3>
+              <label className="flex items-start gap-2 text-sm">
+                <Checkbox
+                  checked={theme.autoCopySelection === true}
+                  onCheckedChange={(checked) =>
+                    setTheme({ autoCopySelection: !!checked })
+                  }
+                />
+                <span>选中文字后自动复制</span>
+              </label>
+              <label className="flex items-start gap-2 text-sm">
+                <Checkbox
+                  checked={theme.autoCopyAnnotation === true}
+                  onCheckedChange={(checked) =>
+                    setTheme({ autoCopyAnnotation: !!checked })
+                  }
+                />
+                <span>点击批注后自动复制原文</span>
+              </label>
+            </section>
             <section className="mb-6">
               <label className="flex items-start gap-2 text-sm">
                 <Checkbox

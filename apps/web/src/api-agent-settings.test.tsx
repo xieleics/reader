@@ -316,3 +316,41 @@ it("defaults chapter context off and persists both toggle states without recheck
   expect(toggle().getAttribute("aria-checked")).toBe("false");
   expect(api.testAI).not.toHaveBeenCalled();
 });
+
+it("keeps selection and annotation auto-copy preferences independent when settings reopen", async () => {
+  useReaderStore.getState().setTheme({
+    autoCopySelection: false,
+    autoCopyAnnotation: false,
+  });
+  await act(async () => root.render(<Settings open onOpenChange={() => {}} />));
+  const checkbox = (label: string) => {
+    const row = [...host.querySelectorAll("label")].find((node) =>
+      node.textContent?.includes(label),
+    );
+    return row!.querySelector<HTMLElement>('[role="checkbox"]')!;
+  };
+  expect(checkbox("选中文字后自动复制").getAttribute("aria-checked")).toBe(
+    "false",
+  );
+  expect(checkbox("点击批注后自动复制原文").getAttribute("aria-checked")).toBe(
+    "false",
+  );
+  await act(async () => checkbox("选中文字后自动复制").click());
+  expect(useReaderStore.getState().theme).toMatchObject({
+    autoCopySelection: true,
+    autoCopyAnnotation: false,
+  });
+  await act(async () =>
+    root.render(<Settings open={false} onOpenChange={() => {}} />),
+  );
+  await act(async () => root.render(<Settings open onOpenChange={() => {}} />));
+  expect(checkbox("选中文字后自动复制").getAttribute("aria-checked")).toBe(
+    "true",
+  );
+  await act(async () => checkbox("点击批注后自动复制原文").click());
+  await act(async () => checkbox("选中文字后自动复制").click());
+  expect(useReaderStore.getState().theme).toMatchObject({
+    autoCopySelection: false,
+    autoCopyAnnotation: true,
+  });
+});
