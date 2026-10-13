@@ -27,6 +27,7 @@ import {
 } from "./proxy-settings";
 import { startUpdateService } from "./update-service";
 import { devIsolation } from "./dev-isolation";
+import { cliPath } from "./cli-path";
 import { startDiagnosticService } from "./diagnostic-service";
 const isolation = devIsolation({
   isPackaged: app.isPackaged,
@@ -72,15 +73,11 @@ async function startServer() {
   const web = app.isPackaged
     ? join(process.resourcesPath, "web")
     : join(root, "web", "dist");
-  const pathValue = [
-    join(homedir(), ".local", "bin"),
-    join(homedir(), ".kimi-code", "bin"),
-    "/opt/homebrew/bin",
-    "/usr/local/bin",
-    process.env.PATH,
-  ]
-    .filter(Boolean)
-    .join(process.platform === "win32" ? ";" : ":");
+  const pathValue = await cliPath({
+    home: homedir(),
+    env: childEnv,
+    platform: process.platform,
+  });
   child = spawn(
     binary,
     [
