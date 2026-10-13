@@ -79,13 +79,9 @@ async function withCertificate(p12, password, sign) {
 
 module.exports = async function sign(options) {
   const p12 = process.env.READER_MAC_SIGN_P12;
-  if (!p12) {
-    if (process.env.RELEASE_TAG)
-      throw new Error(
-        "Release builds must be signed with the fixed Reader certificate (READER_MAC_SIGN_P12).",
-      );
-    return signAsync(options);
-  }
+  // Forks can publish installable builds without copying the upstream private
+  // certificate. electron-builder supplies the ad-hoc identity in this case.
+  if (!p12) return signAsync(options);
   const password = process.env.READER_MAC_SIGN_P12_PASSWORD;
   if (!password) throw new Error("READER_MAC_SIGN_P12_PASSWORD is not set.");
   return withCertificate(p12, password, (identity, keychain) =>
