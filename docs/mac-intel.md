@@ -41,3 +41,7 @@ ONNX Runtime 固定为 `1.22.0`，不能恢复为 `^1.22.0`：当前上游锁定
 ## 原文 PDF 缩放
 
 顶部阅读工具栏提供原文缩放菜单，不遮挡 PDF 内容。菜单显示当前比例，并支持适合宽度、常用百分比以及加减调整；选择沿用现有阅读设置保存，重新打开应用后继续生效。仅译文模式会隐藏该入口，译文排版不随原文 PDF 缩放改变。
+
+## Windows 安装包
+
+Fork 仓库可在 Actions 中手动运行 `Build Windows installer`。工作流先执行完整 CI，再使用原生 `windows-2022` runner 构建并验证 `Reader-0.5.3-win-x64.exe`，最终以 `reader-win-x64` Artifact 保存 7 天。该安装包未使用 Windows 代码签名证书。

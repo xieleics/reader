@@ -12,6 +12,9 @@ on:
       mac-only:
         default: false
         type: boolean
+      windows-only:
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -22,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.mac-only && '[{"os":"macos-15","target":"mac-arm64"}]' || '[{"os":"macos-15","target":"mac-arm64"},{"os":"windows-2022","target":"win-x64"}]') }}
+        include: ${{ fromJSON(inputs.windows-only && '[{"os":"windows-2022","target":"win-x64"}]' || inputs.mac-only && '[{"os":"macos-15","target":"mac-arm64"}]' || '[{"os":"macos-15","target":"mac-arm64"},{"os":"windows-2022","target":"win-x64"}]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     env:
