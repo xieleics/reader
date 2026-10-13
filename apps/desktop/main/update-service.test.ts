@@ -225,3 +225,20 @@ it("does not contact GitHub in development mode", async () => {
     expect.objectContaining({ message: "开发模式不检查更新" }),
   );
 });
+
+it("never contacts the upstream update feed for the manual Intel Mac build", async () => {
+  vi.stubGlobal("process", { ...process, platform: "darwin", arch: "x64" });
+  const service = await startUpdateService(window);
+  stop = service.stop;
+  await vi.advanceTimersByTimeAsync(day * 2);
+  expect(mocks.fetch).not.toHaveBeenCalled();
+  await service.check();
+  expect(mocks.fetch).not.toHaveBeenCalled();
+  expect(mocks.dialog).toHaveBeenCalledWith(
+    window,
+    expect.objectContaining({
+      message: "当前为 Intel 适配版",
+      detail: "原仓库未发布 Intel Mac 安装包，请手动安装新版 DMG。",
+    }),
+  );
+});

@@ -10,6 +10,21 @@ import {
 import { downloadUpdate } from "./update-download";
 
 export async function startUpdateService(window: BrowserWindow) {
+  if (process.platform === "darwin" && process.arch === "x64") {
+    let stopped = false;
+    return {
+      check: async () => {
+        if (stopped || window.isDestroyed()) return;
+        await dialog.showMessageBox(window, {
+          message: "当前为 Intel 适配版",
+          detail: "原仓库未发布 Intel Mac 安装包，请手动安装新版 DMG。",
+        });
+      },
+      stop: () => {
+        stopped = true;
+      },
+    };
+  }
   const directory = app.getPath("userData");
   const statePath = join(directory, "update-state.json");
   let state: UpdateState = {};

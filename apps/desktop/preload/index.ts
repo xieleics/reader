@@ -16,6 +16,7 @@ async function proxyRequest(channel: string, ...args: unknown[]) {
 }
 contextBridge.exposeInMainWorld("readerDesktop", {
   platform: process.platform,
+  arch: process.arch,
   exportDiagnostics: () => ipcRenderer.invoke("reader:export-diagnostics"),
   recordDiagnostic: (event: unknown) =>
     ipcRenderer.send("reader:diagnostic-event", event),

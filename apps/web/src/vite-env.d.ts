@@ -3,6 +3,7 @@
 interface Window {
   readerDesktop?: {
     platform: string;
+    arch: string;
     exportDiagnostics?: () => Promise<boolean>;
     recordDiagnostic?: (
       event: import("../../../packages/reader-core/src/diagnostics").DiagnosticEvent,

@@ -61,6 +61,9 @@ import { GuideHost } from "./guide/GuideHost";
 const currentMode = () =>
   libraryMode(useReaderStore.getState().libraryPreferences);
 export function App() {
+  const intelMac =
+    window.readerDesktop?.platform === "darwin" &&
+    window.readerDesktop.arch === "x64";
   const {
     documents: allDocuments,
     active,
@@ -713,7 +716,14 @@ export function App() {
               <dt className="text-muted-foreground">版本</dt>
               <dd>{version}</dd>
             </dl>
-            {window.readerDesktop?.checkForUpdates && (
+            {intelMac ? (
+              <div className="rounded-lg border px-3 py-2 text-sm">
+                <div className="font-medium">Intel 适配版</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  原仓库未提供 Intel Mac 更新，请手动安装新版 DMG。
+                </div>
+              </div>
+            ) : window.readerDesktop?.checkForUpdates ? (
               <Button
                 variant="outline"
                 disabled={checkingUpdates}
@@ -727,7 +737,7 @@ export function App() {
               >
                 {checkingUpdates ? "正在检查或下载…" : "检查更新"}
               </Button>
-            )}
+            ) : null}
           </DialogContent>
         </Dialog>
         <Dialog open={command} onOpenChange={setCommand}>
