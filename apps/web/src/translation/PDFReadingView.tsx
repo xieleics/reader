@@ -31,7 +31,12 @@ import {
 import { api } from "@reader/api";
 import { Button } from "@reader/ui/components/button";
 import { Tabs, TabsList, TabsTrigger } from "@reader/ui/components/tabs";
-import { Popover, PopoverContent } from "@reader/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@reader/ui/components/popover";
+import { Check, ChevronDown, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ReaderView } from "../ReaderView";
 import { overlap, ReadingSync } from "../readers/pdf-reading";
@@ -81,13 +86,24 @@ export function PDFReadingView({
   events: ReaderEvents;
 }) {
   const [mode, setMode] = useState<Mode>("source"),
-    [swapped, setSwapped] = useState(false);
+    [swapped, setSwapped] = useState(false),
+    [zoomOpen, setZoomOpen] = useState(false);
   const { translations, error } = useTranslations(doc.id);
   const [popup, setPopup] = useState<{ block: PDFBlock; rect: DOMRect }>(),
     [linked, setLinked] = useState<Record<string, number[]>>();
   const [engine, setEngine] = useState<ReaderAdapter>();
   const [hoveredBlock, setHoveredBlock] = useState<string>();
   const [focusedBlock, setFocusedBlock] = useState<string>();
+  const zoomLabel =
+    theme.zoom === "width" ? "适宽" : `${Math.round(theme.zoom * 100)}%`;
+  const setZoom = (zoom: ReaderTheme["zoom"]) => {
+    events.zoom?.(zoom);
+    setZoomOpen(false);
+  };
+  const stepZoom = (amount: number) => {
+    const current = theme.zoom === "width" ? 1 : theme.zoom;
+    events.zoom?.(Math.min(5, Math.max(0.25, current + amount)));
+  };
   const hoverOwner = useRef<"source" | "translation" | undefined>(undefined);
   const hover = (origin: "source" | "translation", blockId?: string) => {
     if (!blockId && hoverOwner.current !== origin) return;
@@ -859,6 +875,69 @@ export function PDFReadingView({
             onPointerDownCapture={() => input("source")}
             onKeyDownCapture={() => input("source")}
           >
+            <Popover open={zoomOpen} onOpenChange={setZoomOpen}>
+              <PopoverTrigger
+                render={
+                  <Button
+                    className="pdf-source-zoom-trigger"
+                    variant="outline"
+                    size="sm"
+                    aria-label={`调整原文缩放，当前${zoomLabel}`}
+                  />
+                }
+              >
+                {zoomLabel}
+                <ChevronDown data-icon="inline-end" />
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                side="bottom"
+                className="pdf-source-zoom-popover"
+              >
+                <div className="pdf-source-zoom-stepper">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="缩小原文"
+                    disabled={theme.zoom !== "width" && theme.zoom <= 0.25}
+                    onClick={() => stepZoom(-0.25)}
+                  >
+                    <Minus />
+                  </Button>
+                  <span aria-live="polite">{zoomLabel}</span>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="放大原文"
+                    disabled={theme.zoom !== "width" && theme.zoom >= 5}
+                    onClick={() => stepZoom(0.25)}
+                  >
+                    <Plus />
+                  </Button>
+                </div>
+                <div className="pdf-source-zoom-options">
+                  {(["width", 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const).map(
+                    (zoom) => {
+                      const selected = theme.zoom === zoom;
+                      return (
+                        <Button
+                          key={zoom}
+                          variant="ghost"
+                          size="sm"
+                          aria-pressed={selected}
+                          onClick={() => setZoom(zoom)}
+                        >
+                          <span>
+                            {zoom === "width" ? "适合宽度" : `${zoom * 100}%`}
+                          </span>
+                          {selected && <Check />}
+                        </Button>
+                      );
+                    },
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             <ReaderView
               document={doc}
               theme={theme}

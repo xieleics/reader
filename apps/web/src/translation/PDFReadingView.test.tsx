@@ -84,7 +84,7 @@ vi.mock("../ReaderView", () => ({
 }));
 import { PDFReadingView } from "./PDFReadingView";
 let root: Root, host: HTMLDivElement;
-const events = { location: vi.fn(), selection: vi.fn() };
+const events = { location: vi.fn(), selection: vi.fn(), zoom: vi.fn() };
 beforeEach(async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal(
@@ -171,6 +171,25 @@ it("retains PDF.js search on pages without parsed blocks", async () => {
     { id: "2", location: { type: "pdf", page: 2 } },
   ]);
   delete adapter.getPageCount;
+});
+
+it("offers source PDF zoom from the top-right popover", async () => {
+  await click("调整原文缩放，当前适宽");
+  const option = Array.from(document.body.querySelectorAll("button")).find(
+    (button) => button.textContent?.trim() === "125%",
+  );
+  expect(option).toBeTruthy();
+  await act(async () => option!.click());
+  expect(events.zoom).toHaveBeenLastCalledWith(1.25);
+
+  await renderView({ ...defaultTheme, zoom: 1.25 });
+  await click("调整原文缩放，当前125%");
+  const increase = document.body.querySelector<HTMLButtonElement>(
+    'button[aria-label="放大原文"]',
+  );
+  expect(increase).toBeTruthy();
+  await act(async () => increase!.click());
+  expect(events.zoom).toHaveBeenLastCalledWith(1.5);
 });
 
 afterEach(async () => {
