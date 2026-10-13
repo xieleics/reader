@@ -39,7 +39,7 @@ try {
     );
     if (signature.error) throw signature.error;
     assert.equal(signature.status, 0, "Packaged signature is invalid");
-    if (process.env.RELEASE_TAG) {
+    if (process.env.RELEASE_TAG && process.env.READER_MAC_SIGN_P12) {
       const details = spawnSync("codesign", ["-dvv", dirname(app)], {
         encoding: "utf8",
       });
