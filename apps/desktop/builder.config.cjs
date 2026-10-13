@@ -11,8 +11,11 @@ module.exports = {
   publish: null,
   protocols: [{ name: "Reader", schemes: ["reader"] }],
   mac: {
-    // The zip is the Squirrel.Mac in-place update payload.
-    target: ["dmg", "zip"],
+    // The bundled ONNX Runtime 1.22 Intel library requires macOS 13.3.
+    minimumSystemVersion: process.arch === "x64" ? "13.3" : undefined,
+    // Intel builds are distributed manually as a DMG until x64 releases exist.
+    // The ARM zip is the Squirrel.Mac in-place update payload.
+    target: process.arch === "x64" ? ["dmg"] : ["dmg", "zip"],
     category: "public.app-category.books",
     icon: "../../assets/icons/macos/icon.icns",
     identity: "-",

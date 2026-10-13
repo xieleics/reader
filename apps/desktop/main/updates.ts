@@ -52,6 +52,7 @@ function record(value: unknown): Record<string, unknown> {
 }
 const installerTargets: Record<string, string> = {
   "darwin/arm64": "mac-arm64.dmg",
+  "darwin/x64": "mac-x64.dmg",
   "win32/x64": "win-x64.exe",
 };
 export function selectRelease(

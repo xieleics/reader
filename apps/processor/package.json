@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.10",
-    "onnxruntime-node": "^1.22.0",
+    "onnxruntime-node": "1.22.0",
     "pdfjs-dist": "6.3.289"
   },
   "devDependencies": {
