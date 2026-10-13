@@ -92,7 +92,7 @@ import { ProcessingUsageDialog } from "./ProcessingUsage";
 import { ModelSelector } from "./ModelSelector";
 import { SourceReferences } from "./SourceReferences";
 import { ChatSession } from "./chat/chat-session";
-import { copyText } from "./chat/clipboard";
+import { copyImage, copyText } from "./chat/clipboard";
 import { AssistantPanel } from "./chat/AssistantPanel";
 import { ImagePreview, imageLabel } from "./ImagePreview";
 import { composeChatContext } from "./chat/compose-context";
@@ -108,6 +108,7 @@ import {
   highlightPalette,
 } from "./annotations";
 import { ColorSwatches } from "./ColorSwatches";
+import { useSelectionClipboard } from "./useSelectionClipboard";
 import { NotesPanel } from "./NotesPanel";
 import { ExportNotesDialog } from "./ExportNotesDialog";
 import { EPUBReadingView } from "./translation/EPUBReadingView";
@@ -755,6 +756,15 @@ export function Workspace({
     }
   };
   const blockAction = (block: PDFBlock, action: PDFBlockAction) => {
+    if (action === "copy") {
+      if (block.image)
+        void copyImage(
+          blockImageURL(doc.id, block.id),
+          (block.caption || block.text).trim(),
+        );
+      else void copyText(block.text.trim(), "已复制");
+      return;
+    }
     if (!block.image) {
       if (action === "explain")
         void send("请解释这段原文的含义，区分原文结论与你的补充说明。", [
