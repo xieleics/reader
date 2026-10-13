@@ -6,7 +6,7 @@ on:
       tag:
         description: Release tag matching the app version
         required: true
-        default: "v0.6.0"
+        default: "v0.6.2"
 
 permissions:
   contents: write
@@ -29,22 +29,26 @@ jobs:
           name: reader-mac-intel-x64
           path: release
       - name: Generate checksums
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          test -s release/Reader-0.6.0-mac-intel-x64.dmg
-          test -s release/Reader-0.6.0-mac-intel-x64.zip
+          version="${RELEASE_TAG#v}"
+          test -s "release/Reader-${version}-mac-intel-x64.dmg"
+          test -s "release/Reader-${version}-mac-intel-x64.zip"
           cd release
-          sha256sum Reader-0.6.0-mac-intel-x64.dmg Reader-0.6.0-mac-intel-x64.zip > SHA256SUMS-intel.txt
+          sha256sum "Reader-${version}-mac-intel-x64.dmg" "Reader-${version}-mac-intel-x64.zip" > SHA256SUMS-intel.txt
       - name: Publish Intel Mac installers
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
+          version="${RELEASE_TAG#v}"
           if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" release/* --repo "${{ github.repository }}" --clobber
           else
             gh release create "$RELEASE_TAG" release/* \
               --repo "${{ github.repository }}" \
               --target "${{ github.sha }}" \
-              --title "Reader 0.6.0 for Intel Mac" \
-              --notes "Reader 0.6.0 for Intel Macs. Includes the DMG installer and ZIP update package."
+              --title "Reader ${version} for Intel Mac" \
+              --notes "Reader ${version} for Intel Macs. Includes the DMG installer and ZIP update package."
           fi
