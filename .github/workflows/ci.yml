@@ -13,6 +13,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # ONNX Runtime 1.22 ships the CPU library used by Reader. Its Linux CUDA
+  # postinstall manifest points at Windows paths, so skip that optional fetch.
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

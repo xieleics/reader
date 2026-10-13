@@ -30,6 +30,7 @@ jobs:
     timeout-minutes: 45
     env:
       RELEASE_TAG: ${{ inputs.release-tag }}
+      ONNXRUNTIME_NODE_INSTALL: skip
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
       # No Apple or Windows credentials. macOS uses the fixed self-signed
       # certificate (apps/desktop/mac-sign.cjs) so in-place updates verify.
