@@ -1,0 +1,43 @@
+name: Publish Windows release
+
+on:
+  workflow_dispatch:
+    inputs:
+      run-id:
+        description: Successful Windows workflow run ID
+        required: true
+        default: "38361085610"
+      tag:
+        description: Release tag
+        required: true
+        default: "windows-v0.5.3"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows installer artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: gh run download "$RUN_ID" --repo "${{ github.repository }}" --name reader-win-x64 --dir dist
+
+      - name: Publish installer to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          installer=$(find dist -type f -name 'Reader-*-win-x64.exe' -print -quit)
+          test -n "$installer"
+          if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$installer" --repo "${{ github.repository }}" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$installer" \
+              --repo "${{ github.repository }}" \
+              --title "Reader 0.5.3 for Windows x64" \
+              --notes "Windows x64 installer built automatically by GitHub Actions."
+          fi
