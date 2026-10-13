@@ -190,6 +190,11 @@ it("offers source PDF zoom from the top-right popover", async () => {
   expect(increase).toBeTruthy();
   await act(async () => increase!.click());
   expect(events.zoom).toHaveBeenLastCalledWith(1.5);
+
+  await click("仅译文");
+  expect(
+    host.querySelector('button[aria-label^="调整原文缩放"]'),
+  ).toBeNull();
 });
 
 afterEach(async () => {
